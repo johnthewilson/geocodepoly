@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Web_Geo_location</title>
+      <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://developers.google.com/maps/documentation/javascript/examples/default.css" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false"></script>
+    
+     <script type="text/javascript">
+      var geocoder;
+      var map;
+      var mapOptions = {
+          zoom: 17,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+      var marker;
+      var marker1;
+      function initialize() {
+        geocoder = new google.maps.Geocoder();
+        map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+        codeAddress();
+      }
+
+      function codeAddress() {
+        var address = document.getElementById('locationone').value;
+        var address2 = document.getElementById('locationtwo').value;
+        var temp,temp2;
+        geocoder.geocode( { 'address': address}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            temp2 = results[0].geometry.location;
+            map.setCenter(results[0].geometry.location);
+            if(marker)
+              marker.setMap(null);
+            marker = new google.maps.Marker({
+                map: map,
+                position: results[0].geometry.location,
+                draggable: true
+            });
+           
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+         geocoder.geocode( { 'address': address2}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+             temp = results[0].geometry.location;
+             map.setCenter(results[0].geometry.location);
+            if(marker1)
+              marker1.setMap(null);
+            marker1 = new google.maps.Marker({
+                map: map,
+                position: results[0].geometry.location,
+                draggable: true
+            });
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+          var route = [
+              temp,
+              temp2
+            ];
+
+            var polyline = new google.maps.Polyline({
+                path: route,
+                strokeColor: "green",
+                strokeOpacity: 0.6,
+                strokeWeight: 5
+            });
+
+            var lengthInMeters = google.maps.geometry.spherical.computeLength(polyline.getPath());
+            var x=lengthInMeters*(0.000621371);         
+            document.getElementById('here').value += x.toFixed(2);
+
+            polyline.setMap(map);
+            
+         });  
+       });
+      }
+    </script>
+  
+      </head>
+  <body onload="initialize()">
+          <div class="container">
+           <form >
+           <h1> This form calculates the distance between two locations</h1>
+
+           <div class="form-group">
+           <label for="geolocation"> Address 1</label>
+           <input type="text" value="San Francisco,CA" class="form-control" id="locationone">
+           </div>
+           <div class="form-group">
+           <label for="geolocation"> Address 2</label>
+           <input type="text" value="Fremont,CA" class="form-control" id="locationtwo">
+           </div>
+           <button type="submit" class="btn btn-default" onclick="codeAddress()">Calculate</button>
+           <input type="text" id="here"> <span style="color:red"> Miles</span>  
+           </form>
+       </div>
+           <div id="map_canvas" style="height:60%;top:30px"></div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+  </body>
+</html>
